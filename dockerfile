@@ -1,11 +1,17 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
+# Install nginx
+RUN apt-get update \
+    && apt-get install -y nginx \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-COPY . .
+# Copy your published .NET files
+COPY . /app
 
-ENV ASPNETCORE_URLS=http://0.0.0.0:10000
+# Remove the Dockerfile/nginx config from the application area if desired
+COPY nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 10000
-
-ENTRYPOINT ["dotnet", "store.dll"]
+# Start both nginx and .NET
+CMD ["sh", "-c", "dotnet store.dll & nginx -g 'daemon off;'"]
